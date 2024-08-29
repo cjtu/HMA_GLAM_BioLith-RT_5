@@ -36,8 +36,9 @@ format long
 %%
 
 % add path to the folder containing the functions and the spectra needed for the run
-addpath('./functions&input-spectra/functions')
-addpath('./functions&input-spectra/input-spectra')
+addpath('./functions_and_input-spectra/functions')
+addpath('./functions_and_input-spectra/input-spectra')
+addpath('./data')
 
 %%
 
@@ -91,9 +92,12 @@ switch FW_mode_only
 %         data.RrsLam=RrsObsSyn1;
         
         % hyperion data (see paper for details)
-        load hyperion.txt
-        data.RrsLam=hyperion;
-        
+        % load hyperion.txt
+        % data.RrsLam=hyperion;
+
+        % emit data
+        load LakePowell_EMIT_053024.csv
+        data.RrsLam=LakePowell_EMIT_053024;
         lambda=data.RrsLam(:,1);             
         
     case 1 % forward mode
@@ -133,8 +137,12 @@ type_case_water=2; % 1=case-1 water; 2=case-2 water
 % sun=35.00;    % [deg]
 
 %hyperion
-view=0.98;   % [deg]
-sun=51.2;    % [deg]
+% view=0.98;   % [deg]
+% sun=51.2;    % [deg]
+
+% EMIT Powell
+view=9.70;   % [deg]
+sun=27.05;    % [deg]
 
 
 %% 5) Water component concentrations
@@ -149,7 +157,7 @@ C_CDOM=0.0001  ;                   % [mg/m^3]
 S_CDOM =-0.0002*C_CDOM + 0.0095;   % slope for the a_CDOM(lambda) modeling
 
 % SPM
-C_X = 2.5 ;                      % [g/m^3]   
+C_X = 2.5 ;                      % [g/m^3]
 S_X= 0.0116;                     % slope for the a_X(lambda) modeling
 g_size_microm= 50;               % [µm]       Grain size in [µm], default 33.6 [µm]  
 g_size=g_size_microm*10^(-6);    % [m]        Grain size in [m]

@@ -8,8 +8,8 @@ n_w= 1.33; % water index of refration (real part)
 %% Angles from the water
 
 % from deg to rad
-view=view*(180/pi); % rad
-sun=sun*(180/pi);   % rad
+view=deg2rad(view); % rad
+sun=deg2rad(180/pi);   % rad
 % angles from the water rad
 view_w= asin((n_air/n_w)*sin(view));   % rad
 sun_w= asin((n_air/n_w)*sin(sun));     % rad

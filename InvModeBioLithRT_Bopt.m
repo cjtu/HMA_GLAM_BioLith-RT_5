@@ -200,8 +200,8 @@ omega_b= bb./ext; % single back scattering albedo
 
 %% angles from deg to rad
 
-view_rad=view*(180/pi); % rad
-sun_rad=sun*(180/pi);   % rad
+view_rad=deg2rad(view); % rad
+sun_rad=deg2rad(sun);   % rad
 
 %% Remote Sensing Reflectance below the water surface
 
