@@ -56,20 +56,20 @@ data.pow.sun  = 27.05;
 
 data.im1.label = "Imja 2023-06-05";
 data.im1.data = load('EMIT_L2A_RFL_001_20230605T045030_2315604_004_spectrum.csv').';
-data.im1.data = data.im1.data(:,1:2:3);
+data.im1.data = data.im1.data(1:5:end,1:2:3);  % Take 2nd row from file
 data.im1.view = 7.75;
 data.im1.sun  = 18.9;
 data.im1.colorA = '#4E79A7';
-data.im1.colorB = '#A0CBE8';
+data.im1.colorB = '#849db1';
 
 
 data.im2.label = "Imja 2023-08-31";
 data.im2.data = load('EMIT_L2A_RFL_001_20230831T030641_2324302_015_spectrum.csv').';
-data.im2.data = data.im2.data(:,1:2:3);
+data.im2.data = data.im2.data(1:5:end,1:2:3);  % Take 2nd row from file
 data.im2.view = 8.41;
 data.im2.sun  = 47.76;
 data.im2.colorA = '#F28E2B';
-data.im2.colorB = '#FFBE7D';
+data.im2.colorB = '#FBB04e';
 
 data.im3.label = "Imja 2024-02-27";
 data.im3.data = load('EMIT_L2A_RFL_001_20240227T034910_2405803_005_spectrum.csv').';
@@ -82,20 +82,18 @@ data.im3.colorB = '#8CD17D';
 % Plot data
 figure(1); hold on
 plot(data.im1.data(:,1),data.im1.data(:,2), 'Color', data.im1.colorA, 'Linewidth', 3)
-% plot(data.im1.data(:,1),data.im1.data(:,2), '--', 'Color', data.im1.colorA, 'Linewidth', 2)
-
+% plot(data.im1.data(:,1),data.im1.data(:,2), ':o', 'Color', data.im1.colorB, 'Linewidth', 3)
 plot(data.im2.data(:,1),data.im2.data(:,2), 'Color', data.im2.colorA, 'Linewidth', 3)
-% plot(data.im2.data(:,1),data.im2.data(:,2), '--', 'Color', data.im2.colorA, 'Linewidth', 2)
-
-plot(data.im3.data(:,1),data.im3.data(:,2), 'Color', data.im3.colorA, 'Linewidth', 3)
-% plot(data.im3.data(:,1),data.im3.data(:,2), '--', 'Color', data.im3.colorA, 'Linewidth', 2); grid on
+% plot(data.im2.data(:,1),data.im2.data(:,2), ':o', 'Color', data.im2.colorB, 'Linewidth', 3)
+% plot(data.im3.data(:,1),data.im3.data(:,2), 'Color', data.im3.colorA, 'Linewidth', 3)
+% plot(data.im3.data(:,1),data.im3.data(:,2), '--', 'Color', data.im3.colorB, 'Linewidth', 3); grid on
 % title('Remote Sensing Reflectance','FontSize', 24)
 xlabel('Wavelength[nm]','FontSize', 18)
 ylabel('Reflectance [sr^-^1]','FontSize', 18)
-legend (data.im1.label, data.im2.label, data.im3.label)
+legend (data.im1.label, data.im2.label)
 
 % TODO: remove, just adding a legend since the for loop legend didn't work
-% legend([data.im1.label + " Observed" data.im1.label + " GLAMBioLith" data.im2.label + " Observed" data.im2.label + " GLAMBioLith" data.im3.label + " Observed" data.im3.label + " GLAMBioLith"])
+% legend([data.im1.label + " Observed" data.im1.label + " GLAMBioLith" data.im2.label + " Observed" data.im2.label + " GLAMBioLith"])
 
 xlim([data.im1.data(1,1) data.im1.data(end,1)])
 print('raw', '-dpng');
@@ -108,7 +106,7 @@ figure(2)
 %% 0) Choose data for this MCMC run
 % d = data.im2;
 
-for d = [data.im1 data.im2 data.im3] 
+for d = [data.im1 data.im2] 
 
 %% 1) Global Variables
 
@@ -448,9 +446,9 @@ switch FW_mode_only
         % figure(6)
         hold on
         grid on
-        plot(d.data(:,1),d.data(:,2), 'Color', d.colorA, 'Linewidth', 3);
-        plot(lambda, Rrs_B, '--', 'Color', d.colorB, 'Linewidth', 4);
-        
+        h=plot(d.data(:,1),d.data(:,2), 'Color', d.colorA, 'Linewidth', 3);
+        plot(lambda, Rrs_B, ':o', 'Color', d.colorB, 'Linewidth', 3);
+        uistack(h, "bottom")
         % title('Remote Sensing Reflectance','FontSize', 24)
         xlabel('Wavelength[nm]','FontSize', 18)
         ylabel('Reflectance [sr^-^1]','FontSize', 18)
@@ -478,8 +476,6 @@ switch FW_mode_only
         ylabel('Rrs [1/sr]','FontSize', 20)
         xlim([lambda(1) lambda(end)])
 end
-% legend for hold fig (TODO: fix)
 end
-
 %%
 %-------------------------------------------------------------------------
