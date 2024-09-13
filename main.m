@@ -40,11 +40,54 @@ addpath('./functions_and_input-spectra/functions')
 addpath('./functions_and_input-spectra/input-spectra')
 addpath('./data')
 
-%%
+%% Load data
+%% synt. reflectance data (see paper for details)
+data.syn.data = load('RrsObsSyn1.txt');  % [wavelength, ref]
+data.syn.view = eps;   % [deg] spacecraft zenith angle
+data.syn.sun  = 35.00; % [deg] sun zenith angle
+%% hyperion data (see paper for details)
+data.hyp.data = load('hyperion.txt');
+data.hyp.view = 0.98;
+data.hyp.sun  = 51.2;
+%% EMIT data
+data.pow.data = load('LakePowell_EMIT_053024.csv');
+data.pow.view = 9.70;
+data.pow.sun  = 27.05;
+data.im1.data = load('ImjaLake_spectrum_2023-06-05.csv');
+data.im1.view = eps;
+data.im1.sun  = 10.0;
+data.im2.data = load('ImjaLake_spectrum_2024-02-27.csv');
+data.im2.view = eps;
+data.im2.sun  = 10.0;
+data.im3.data = load('ImjaLake_spectrum_2024-05-30.csv');
+data.im3.view = 7.79;
+data.im3.sun  = 18.90;
+data.im4.data = load('ImjaLake_spectrum_2024-06-03.csv');
+data.im4.view = eps;
+data.im4.sun  = 10.0;
+
+% Plot data
+figure(1)
+plot(data.im1.data(:,1),data.im1.data(:,2), ...
+     data.im2.data(:,1),data.im2.data(:,2), ...
+     data.im3.data(:,1),data.im3.data(:,2), ...
+     data.im4.data(:,1),data.im4.data(:,2), 'Linewidth', 3); grid on
+% title('Remote Sensing Reflectance','FontSize', 24)
+xlabel('Wavelength[nm]','FontSize', 20)
+ylabel('Rrs [1/sr]','FontSize', 20)
+legend ('Imja 2023-06-05', 'Imja 2024-02-27', 'Imja 2024-05-30', 'Imja 2024-06-03')
+xlim([data.im1.data(1,1) data.im1.data(end,1)])
+print('raw', '-dpng');
+figure(2)
 
 %--------------------------------------------------------------------------
 %% Input
 %--------------------------------------------------------------------------
+
+%% 0) Choose data for this MCMC run
+% d = data.im2;
+
+for d = [data.im1 data.im2 data.im4] 
 
 %% 1) Global Variables
 
@@ -86,18 +129,8 @@ FW_mode_only=0; % 0= inverse-mode, 1= forward-mode
 switch FW_mode_only
     
     case 0 % inverse mode
-        
-        % synt. reflectance data (see paper for details)
-%         load RrsObsSyn1.txt
-%         data.RrsLam=RrsObsSyn1;
-        
-        % hyperion data (see paper for details)
-        % load hyperion.txt
-        % data.RrsLam=hyperion;
-
-        % emit data
-        load LakePowell_EMIT_053024.csv
-        data.RrsLam=LakePowell_EMIT_053024;
+        % Subset to valid range
+        data.RrsLam=d.data((d.data(:,1) > 400) & (d.data(:,1) < 700),:);
         lambda=data.RrsLam(:,1);             
         
     case 1 % forward mode
@@ -133,16 +166,8 @@ type_case_water=2; % 1=case-1 water; 2=case-2 water
 
 % Enter the view (camera) and the sun angles [degrees] - zenith angles
 
-% view=eps;   % [deg]
-% sun=35.00;    % [deg]
-
-%hyperion
-% view=0.98;   % [deg]
-% sun=51.2;    % [deg]
-
-% EMIT Powell
-view=9.70;   % [deg]
-sun=27.05;    % [deg]
+view=d.view;   % [deg]
+sun=d.sun;    % [deg]
 
 
 %% 5) Water component concentrations
@@ -159,7 +184,7 @@ S_CDOM =-0.0002*C_CDOM + 0.0095;   % slope for the a_CDOM(lambda) modeling
 % SPM
 C_X = 2.5 ;                      % [g/m^3]
 S_X= 0.0116;                     % slope for the a_X(lambda) modeling
-g_size_microm= 50;               % [µm]       Grain size in [µm], default 33.6 [µm]  
+g_size_microm= 50;               % [ï¿½m]       Grain size in [ï¿½m], default 33.6 [ï¿½m]  
 g_size=g_size_microm*10^(-6);    % [m]        Grain size in [m]
 
 
@@ -373,16 +398,16 @@ switch FW_mode_only
         % chain plots
         
         % mcmc sampling
-        figure(1); clf
-        mcmcplot(chain,[],res,'chainpanel');
+        % figure(1); clf
+        % mcmcplot(chain,[],res,'chainpanel');
         
 %         % scatter plots
 %         figure(2)
 %         mcmcplot(chain,[],res,'pairs');
         
         % posteriors
-        figure(3)
-        mcmcplot(chain,[],res,'denspanel',2);
+        % figure(3)
+        % mcmcplot(chain,[],res,'denspanel',2);
         
         % error std posterior
 %         figure(4); clf
@@ -390,13 +415,27 @@ switch FW_mode_only
 %         title('Error std posterior')
         
         % Remote sensing reflectance plot
-        figure(5)
-        plot(lambda,Rrs0,lambda,Rrs_fit,lambda, Rrs_B,lambda,Rrs_obs, 'Linewidth', 3); grid on
-        title('Remote Sensing Reflectance','FontSize', 24)
+        % figure(5)
+        % plot(lambda,Rrs0,lambda,Rrs_fit,lambda, Rrs_B,lambda,Rrs_obs, 'Linewidth', 3); grid on
+        % title('Remote Sensing Reflectance','FontSize', 24)
+        % xlabel('Wavelength[nm]','FontSize', 20)
+        % ylabel('Rrs [1/sr]','FontSize', 20)
+        % legend ('Rrs guess', 'Rrs fit C' , 'Rrs fit B' ,'Rrs measured')
+        % xlim([lambda(1) lambda(end)])
+
+        % Compare full data range plot
+        % figure(6)
+        hold on
+        grid on
+        plot(lambda, Rrs_B, '--', 'Linewidth', 3);
+        plot(d.data(:,1),d.data(:,2), 'Linewidth', 3);
+        % title('Remote Sensing Reflectance','FontSize', 24)
         xlabel('Wavelength[nm]','FontSize', 20)
-        ylabel('Rrs [1/sr]','FontSize', 20)
-        legend ('Rrs guess', 'Rrs fit C' , 'Rrs fit B' ,'Rrs measured')
-        xlim([lambda(1) lambda(end)])
+        ylabel('Reflectance [sr^-^1]','FontSize', 20)
+        % legend ('Rrs MCMC fit' ,'Rrs Measured')
+        xlim([d.data(1,1) d.data(end,1)])
+
+        print('refplot', '-dpng');
         
     case 1 % forward mode
         
@@ -415,7 +454,7 @@ switch FW_mode_only
         xlabel('Wavelength[nm]','FontSize', 20)
         ylabel('Rrs [1/sr]','FontSize', 20)
         xlim([lambda(1) lambda(end)])
-        
+end     
 end
 %%
 %-------------------------------------------------------------------------
