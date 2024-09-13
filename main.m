@@ -53,29 +53,50 @@ data.hyp.sun  = 51.2;
 data.pow.data = load('LakePowell_EMIT_053024.csv');
 data.pow.view = 9.70;
 data.pow.sun  = 27.05;
-data.im1.data = load('ImjaLake_spectrum_2023-06-05.csv');
-data.im1.view = eps;
-data.im1.sun  = 10.0;
-data.im2.data = load('ImjaLake_spectrum_2024-02-27.csv');
-data.im2.view = eps;
-data.im2.sun  = 10.0;
-data.im3.data = load('ImjaLake_spectrum_2024-05-30.csv');
-data.im3.view = 7.79;
-data.im3.sun  = 18.90;
-data.im4.data = load('ImjaLake_spectrum_2024-06-03.csv');
-data.im4.view = eps;
-data.im4.sun  = 10.0;
+
+data.im1.label = "Imja 2023-06-05";
+data.im1.data = load('EMIT_L2A_RFL_001_20230605T045030_2315604_004_spectrum.csv').';
+data.im1.data = data.im1.data(:,1:2:3);
+data.im1.view = 7.75;
+data.im1.sun  = 18.9;
+data.im1.colorA = '#4E79A7';
+data.im1.colorB = '#A0CBE8';
+
+
+data.im2.label = "Imja 2023-08-31";
+data.im2.data = load('EMIT_L2A_RFL_001_20230831T030641_2324302_015_spectrum.csv').';
+data.im2.data = data.im2.data(:,1:2:3);
+data.im2.view = 8.41;
+data.im2.sun  = 47.76;
+data.im2.colorA = '#F28E2B';
+data.im2.colorB = '#FFBE7D';
+
+data.im3.label = "Imja 2024-02-27";
+data.im3.data = load('EMIT_L2A_RFL_001_20240227T034910_2405803_005_spectrum.csv').';
+data.im3.data = data.im3.data(:,1:2:3);
+data.im3.view = 7.85;
+data.im3.sun  = 52.41;
+data.im3.colorA = '#59A14F';
+data.im3.colorB = '#8CD17D';
 
 % Plot data
-figure(1)
-plot(data.im1.data(:,1),data.im1.data(:,2), ...
-     data.im2.data(:,1),data.im2.data(:,2), ...
-     data.im3.data(:,1),data.im3.data(:,2), ...
-     data.im4.data(:,1),data.im4.data(:,2), 'Linewidth', 3); grid on
+figure(1); hold on
+plot(data.im1.data(:,1),data.im1.data(:,2), 'Color', data.im1.colorA, 'Linewidth', 3)
+% plot(data.im1.data(:,1),data.im1.data(:,2), '--', 'Color', data.im1.colorA, 'Linewidth', 2)
+
+plot(data.im2.data(:,1),data.im2.data(:,2), 'Color', data.im2.colorA, 'Linewidth', 3)
+% plot(data.im2.data(:,1),data.im2.data(:,2), '--', 'Color', data.im2.colorA, 'Linewidth', 2)
+
+plot(data.im3.data(:,1),data.im3.data(:,2), 'Color', data.im3.colorA, 'Linewidth', 3)
+% plot(data.im3.data(:,1),data.im3.data(:,2), '--', 'Color', data.im3.colorA, 'Linewidth', 2); grid on
 % title('Remote Sensing Reflectance','FontSize', 24)
-xlabel('Wavelength[nm]','FontSize', 20)
-ylabel('Rrs [1/sr]','FontSize', 20)
-legend ('Imja 2023-06-05', 'Imja 2024-02-27', 'Imja 2024-05-30', 'Imja 2024-06-03')
+xlabel('Wavelength[nm]','FontSize', 18)
+ylabel('Reflectance [sr^-^1]','FontSize', 18)
+legend (data.im1.label, data.im2.label, data.im3.label)
+
+% TODO: remove, just adding a legend since the for loop legend didn't work
+% legend([data.im1.label + " Observed" data.im1.label + " GLAMBioLith" data.im2.label + " Observed" data.im2.label + " GLAMBioLith" data.im3.label + " Observed" data.im3.label + " GLAMBioLith"])
+
 xlim([data.im1.data(1,1) data.im1.data(end,1)])
 print('raw', '-dpng');
 figure(2)
@@ -87,7 +108,7 @@ figure(2)
 %% 0) Choose data for this MCMC run
 % d = data.im2;
 
-for d = [data.im1 data.im2 data.im4] 
+for d = [data.im1 data.im2 data.im3] 
 
 %% 1) Global Variables
 
@@ -427,12 +448,14 @@ switch FW_mode_only
         % figure(6)
         hold on
         grid on
-        plot(lambda, Rrs_B, '--', 'Linewidth', 3);
-        plot(d.data(:,1),d.data(:,2), 'Linewidth', 3);
+        plot(d.data(:,1),d.data(:,2), 'Color', d.colorA, 'Linewidth', 3);
+        plot(lambda, Rrs_B, '--', 'Color', d.colorB, 'Linewidth', 4);
+        
         % title('Remote Sensing Reflectance','FontSize', 24)
-        xlabel('Wavelength[nm]','FontSize', 20)
-        ylabel('Reflectance [sr^-^1]','FontSize', 20)
-        % legend ('Rrs MCMC fit' ,'Rrs Measured')
+        xlabel('Wavelength[nm]','FontSize', 18)
+        ylabel('Reflectance [sr^-^1]','FontSize', 18)
+         
+        % legend (strcat(d.label, ' Observed'), strcat(d.label, ' Modeled'))
         xlim([d.data(1,1) d.data(end,1)])
 
         print('refplot', '-dpng');
@@ -454,7 +477,9 @@ switch FW_mode_only
         xlabel('Wavelength[nm]','FontSize', 20)
         ylabel('Rrs [1/sr]','FontSize', 20)
         xlim([lambda(1) lambda(end)])
-end     
 end
+% legend for hold fig (TODO: fix)
+end
+
 %%
 %-------------------------------------------------------------------------
